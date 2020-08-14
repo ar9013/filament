@@ -43,15 +43,10 @@ public:
         VkFormat colorFormat[MRT::TARGET_COUNT]; // 16 bytes
         VkImageLayout depthLayout;  // 4 bytes
         VkFormat depthFormat; // 4 bytes
-        union {
-            struct {
-                TargetBufferFlags clear;
-                TargetBufferFlags discardStart;
-                TargetBufferFlags discardEnd;
-                uint8_t padding0;
-            };
-            uint32_t value; // 4 bytes
-        } flags;
+        TargetBufferFlags clear : 8; // 1 byte
+        TargetBufferFlags discardStart : 8; // 1 byte
+        TargetBufferFlags discardEnd : 8; // 1 byte
+        uint8_t samples; // 1 byte
         uint32_t subpassMask; // 4 bytes
     };
     struct RenderPassVal {
@@ -73,6 +68,7 @@ public:
     struct alignas(8) FboKey {
         VkRenderPass renderPass; // 8 bytes
         VkImageView color[MRT::TARGET_COUNT]; // 32 bytes
+        VkImageView resolve[MRT::TARGET_COUNT]; // 32 bytes
         VkImageView depth; // 8 bytes
     };
     struct FboVal {
@@ -81,7 +77,7 @@ public:
     };
     static_assert(sizeof(VkRenderPass) == 8, "VkRenderPass has unexpected size.");
     static_assert(sizeof(VkImageView) == 8, "VkImageView has unexpected size.");
-    static_assert(sizeof(FboKey) == 48, "FboKey has unexpected size.");
+    static_assert(sizeof(FboKey) == 80, "FboKey has unexpected size.");
     using FboKeyHashFn = utils::hash::MurmurHashFn<FboKey>;
     struct FboKeyEqualFn {
         bool operator()(const FboKey& k1, const FboKey& k2) const;
